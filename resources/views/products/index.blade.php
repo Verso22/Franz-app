@@ -39,6 +39,12 @@
                     <td>{{ $product->expiry_date }}</td>
                     <td>
                         <a href="{{ route('products.edit', $product->id) }}">Edit</a>
+
+                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
                     </td>
                 </tr>
             @empty
