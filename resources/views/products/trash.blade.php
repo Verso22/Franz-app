@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Products List</title>
+    <title>Trashed Products</title>
 </head>
 <body>
-    <h1>All Products</h1>
+    <h1>Trashed Products</h1>
 
-    {{-- Show success message --}}
+    {{-- Success message --}}
     @if(session('success'))
         <p style="color: green;">{{ session('success') }}</p>
     @endif
 
-    {{-- Link to create form --}}
-    <a href="{{ route('products.create') }}">+ Add New Product</a>
+    <a href="{{ route('products.index') }}">← Back to Product List</a>
 
     <table border="1" cellpadding="8" cellspacing="0" style="margin-top:10px;">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Stock</th>
-                <th>Price</th>
                 <th>Category</th>
                 <th>Brand</th>
-                <th>Expiry Date</th>
+                <th>Deleted At</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -32,25 +29,20 @@
                 <tr>
                     <td>{{ $product->id }}</td>
                     <td>{{ $product->name }}</td>
-                    <td>{{ $product->stock }}</td>
-                    <td>{{ $product->price }}</td>
                     <td>{{ $product->category }}</td>
                     <td>{{ $product->brand }}</td>
-                    <td>{{ $product->expiry_date }}</td>
+                    <td>{{ $product->deleted_at }}</td>
                     <td>
-                        <a href="{{ route('products.create') }}">+ Add New Product</a> | 
-                        <a href="{{ route('products.trash') }}">🗑️ View Trash Bin</a>
-
-                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('products.restore', $product->id) }}" method="POST" style="display:inline;">
                             @csrf
-                            @method('DELETE')
-                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                            @method('PATCH')
+                            <button type="submit">Restore</button>
                         </form>
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">No products found.</td>
+                    <td colspan="6">No trashed products found.</td>
                 </tr>
             @endforelse
         </tbody>

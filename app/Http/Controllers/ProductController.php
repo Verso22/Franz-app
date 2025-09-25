@@ -92,4 +92,20 @@ class ProductController extends Controller
 
         return redirect()->route('product.index')->with('success', 'Product deleted successfully.');
         }
+        // Show trashed (soft deleted) products
+    public function trash()
+        {
+            $products = Product::onlyTrashed()->get();
+        return view('products.trash', compact('products'));
+        }
+
+        // Restore a trashed product
+    public function restore($id)
+        {
+            $product = Product::onlyTrashed()->where('id', $id)->firstOrFail();
+            $product->restore();
+
+        return redirect()->route('products.trash')->with('success', 'Product restored successfully.');
+        }
+
 }
