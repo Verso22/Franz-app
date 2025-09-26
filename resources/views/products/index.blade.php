@@ -1,21 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Products List</title>
-</head>
-<body>
+@extends('layouts.app')  
+{{-- 🧩 This means: "use the layout from layouts/app.blade.php" --}}
+
+@section('content')  
+{{-- 🧩 Everything inside here will be placed into the @yield('content') in the layout --}}
+
     <h1>All Products</h1>
 
-    {{-- Show success message --}}
+    {{-- 🧩 Success message after adding/updating/deleting --}}
     @if(session('success'))
-        <p style="color: green;">{{ session('success') }}</p>
+        <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    {{-- Link to create form --}}
-    <a href="{{ route('products.create') }}">+ Add New Product</a>
+    {{-- 🧩 Top action buttons (only appear once, above the table) --}}
+    <a href="{{ route('products.create') }}" class="btn btn-primary mb-3">+ Add New Product</a>
+    <a href="{{ route('products.trash') }}" class="btn btn-secondary mb-3">🗑️ View Trash Bin</a>
 
-    <table border="1" cellpadding="8" cellspacing="0" style="margin-top:10px;">
-        <thead>
+    <!-- 🧩 Table to show all products -->
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>ID</th>
                 <th>Name</th>
@@ -38,22 +40,32 @@
                     <td>{{ $product->brand }}</td>
                     <td>{{ $product->expiry_date }}</td>
                     <td>
-                        <a href="{{ route('products.create') }}">+ Add New Product</a> | 
-                        <a href="{{ route('products.trash') }}">🗑️ View Trash Bin</a>
+                        <!-- 🧩 Edit button (yellow small button) -->
+                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">Edit</a>
 
+                        <!-- 🧩 Delete button (red small button) -->
                         <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
+                                Delete
+                            </button>
                         </form>
                     </td>
                 </tr>
             @empty
+                <!-- 🧩 If there are no products, show this -->
                 <tr>
-                    <td colspan="8">No products found.</td>
+                    <td colspan="8" class="text-center">No products found.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
-</body>
-</html>
+        <!-- 🧩 NEW: Trash Bin button placed at the bottom of the table -->
+    <!-- This gives the user another shortcut to view deleted products -->
+    <a href="{{ route('products.trash') }}" class="btn btn-secondary mt-3">🗑️ View Trash Bin</a>
+        <!-- 🧩 NEW: Back to Home button (helps user return to homepage) -->
+    <a href="{{ url('/') }}" class="btn btn-light mt-2">🏠 Back to Home</a>
+
+
+@endsection

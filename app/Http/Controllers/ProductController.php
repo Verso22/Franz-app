@@ -8,34 +8,32 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     /**
-     * Show list of products
+     * 📋 Show list of products
      */
     public function index()
     {
         // Get all products (newest first)
         $products = Product::orderBy('id', 'desc')->get();
 
-        // Return the view resources/views/products/index.blade.php
-        // and pass the $products collection to it
+        // Return the index view with the products
         return view('products.index', compact('products'));
     }
 
     /**
-     * Show the create form (same view used for edit)
+     * ➕ Show the create form
      */
     public function create()
     {
-        // We'll reuse resources/views/products/form.blade.php
-        // pass null so the view knows it's a "create" action
+        // Reuse the same form view, pass null since it's "create"
         return view('products.form')->with('product', null);
     }
 
     /**
-     * Store the new product in the database
+     * 💾 Store the new product in the database
      */
     public function store(Request $request)
     {
-        // Validate incoming data - if validation fails, user returns to the form
+        // Validate user input
         $data = $request->validate([
             'name' => 'required|string|max:255|unique:products,name',
             'description' => 'nullable|string',
@@ -46,66 +44,83 @@ class ProductController extends Controller
             'expiry_date' => 'nullable|date',
         ]);
 
-        // Create the product (mass assignment uses $fillable in the Model)
+        // Save to DB
         Product::create($data);
 
-        // Redirect back to list with a success message
         return redirect()->route('products.index')->with('success', 'Product added successfully.');
     }
 
     /**
-     * Show the edit form for a specific product
+     * ✏️ Show the edit form
      */
     public function edit(Product $product)
     {
-        // Pass the Product model to the same form view (it will be filled)
         return view('products.form', compact('product'));
     }
 
     /**
-     * Update a product in the database
+     * 🔄 Update a product
      */
     public function update(Request $request, Product $product)
     {
-        // Same validation rules as store()
+        // Validation (ignore current product name for unique rule)
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:products,name,' . $id,
+            'name' => 'required|string|max:255|unique:products,name,' . $product->id,
             'description' => 'nullable|string',
             'stock' => 'required|integer',
             'price' => 'required|numeric',
             'category' => 'nullable|string|max:100',
             'brand' => 'nullable|string|max:100',
             'expiry_date' => 'nullable|date',
-            ]);
+        ]);
 
-        // Update the product
+        // Update in DB
         $product->update($data);
 
-        // Back to list with message
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
+    /**
+     * 🗑️ Soft delete a product
+     */
     public function destroy($id)
-        {
-            $product = Product::findFail($id);
-            $product->delete();
+    {
+        $product = Product::findOrFail($id);
+        $product->delete();
 
-        return redirect()->route('product.index')->with('success', 'Product deleted successfully.');
-        }
-        // Show trashed (soft deleted) products
+        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    /**
+     * 🗂️ Show trashed (soft deleted) products
+     */
     public function trash()
-        {
-            $products = Product::onlyTrashed()->get();
-        return view('products.trash', compact('products'));
-        }
+    {
+        // onlyTrashed = fetch soft-deleted only
+        $products = Product::onlyTrashed()->orderBy('deleted_at', 'desc')->get();
 
-        // Restore a trashed product
+        return view('products.trash', compact('products'));
+    }
+
+    /**
+     * 🔙 Restore a trashed product
+     */
     public function restore($id)
-        {
-            $product = Product::onlyTrashed()->where('id', $id)->firstOrFail();
-            $product->restore();
+    {
+        $product = Product::onlyTrashed()->where('id', $id)->firstOrFail();
+        $product->restore();
 
         return redirect()->route('products.trash')->with('success', 'Product restored successfully.');
-        }
+    }
 
+    /**
+     * 🚮 Permanently delete a product from trash
+     */
+    public function forceDelete($id)
+    {
+        $product = Product::onlyTrashed()->where('id', $id)->firstOrFail();
+        $product->forceDelete();
+
+        return redirect()->route('products.trash')->with('success', 'Product permanently deleted.');
+    }
 }

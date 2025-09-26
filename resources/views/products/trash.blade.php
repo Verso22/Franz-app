@@ -1,27 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Trashed Products</title>
-</head>
-<body>
-    <h1>Trashed Products</h1>
+@extends('layouts.app')
 
-    {{-- Success message --}}
+@section('content')
+    <h2>🗑️ Trash Bin (Deleted Products)</h2>
+
+    {{-- ✅ Success message --}}
     @if(session('success'))
-        <p style="color: green;">{{ session('success') }}</p>
+        <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <a href="{{ route('products.index') }}">← Back to Product List</a>
+    {{-- ✅ Back to product list --}}
+    <a href="{{ route('products.index') }}" class="btn btn-primary mb-3">← Back to Product List</a>
+        <!-- 🧩 NEW: Back to Home button (helps user return to homepage) -->
+    <a href="{{ url('/') }}" class="btn btn-light mb-3">🏠 Back to Home</a>
 
-    <table border="1" cellpadding="8" cellspacing="0" style="margin-top:10px;">
-        <thead>
+
+    {{-- ✅ Table of trashed products --}}
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Category</th>
                 <th>Brand</th>
                 <th>Deleted At</th>
-                <th>Action</th>
+                <th style="width:240px">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -33,19 +35,31 @@
                     <td>{{ $product->brand }}</td>
                     <td>{{ $product->deleted_at }}</td>
                     <td>
+                        {{-- 🔄 Restore --}}
                         <form action="{{ route('products.restore', $product->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('PATCH')
-                            <button type="submit">Restore</button>
+                            <button type="submit" class="btn btn-success btn-sm">
+                                Restore
+                            </button>
+                        </form>
+
+                        {{-- ❌ Force Delete --}}
+                        <form action="{{ route('products.forceDelete', $product->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('⚠️ Permanently delete this product? This cannot be undone!')">
+                                Delete Permanently
+                            </button>
                         </form>
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6">No trashed products found.</td>
+                    <td colspan="6" class="text-center">No trashed products found.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
-</body>
-</html>
+@endsection

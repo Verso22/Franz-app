@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ $product ? 'Edit Product' : 'Add Product' }}</title>
-</head>
-<body>
-    <h1>{{ $product ? 'Edit Product' : 'Add Product' }}</h1>
+@extends('layouts.app')  
+{{-- 🧩 This means: use the layout so Bootstrap is loaded --}}
 
-    {{-- Show validation errors --}}
+@section('content')
+    <h2>{{ isset($product) ? 'Edit Product' : 'Add New Product' }}</h2>
+
+    {{-- 🧩 Show validation errors --}}
     @if ($errors->any())
-        <div style="color: red;">
+        <div class="alert alert-danger">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -17,45 +15,76 @@
         </div>
     @endif
 
-    @if ($product)
-        {{-- Edit form --}}
-        <form method="POST" action="{{ route('products.update', $product->id) }}">
-            @method('PUT')
-    @else
-        {{-- Create form --}}
-        <form method="POST" action="{{ route('products.store') }}">
-    @endif
+        <!-- 🧩 NEW: Navigation buttons -->
+    <a href="{{ route('products.index') }}" class="btn btn-primary mb-3">← Back to Product List</a>
+    <a href="{{ url('/') }}" class="btn btn-light mb-3">🏠 Back to Home</a>
+
+        {{-- 🧩 Form changes depending on Add vs Edit --}}
+    <form action="{{ isset($product) ? route('products.update', $product->id) : route('products.store') }}" method="POST">
+
         @csrf
+        @if(isset($product))
+            @method('PUT')
+        @endif
 
-        <label>Name:</label><br>
-        <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}"><br><br>
+        <!-- 🧩 Name -->
+        <div class="mb-3">
+            <label for="name" class="form-label">Product Name</label>
+            <input type="text" name="name" class="form-control" 
+                    value="{{ old('name', $product->name ?? '') }}" required>
+            @error('name')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-        @error('name')
-            <p style="color:red">{{ $message }}</p>
-        @enderror
+        <!-- 🧩 Description -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea name="description" class="form-control">{{ old('description', $product->description ?? '') }}</textarea>
+            @error('description')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-        <label>Description:</label><br>
-        <textarea name="description">{{ old('description', $product->description ?? '') }}</textarea><br><br>
+        <!-- 🧩 Stock -->
+        <div class="mb-3">
+            <label for="stock" class="form-label">Stock</label>
+            <input type="number" name="stock" class="form-control" 
+                    value="{{ old('stock', $product->stock ?? '') }}" required>
+        </div>
 
-        <label>Stock:</label><br>
-        <input type="number" name="stock" value="{{ old('stock', $product->stock ?? '') }}"><br><br>
+        <!-- 🧩 Price -->
+        <div class="mb-3">
+            <label for="price" class="form-label">Price</label>
+            <input type="number" step="0.01" name="price" class="form-control" 
+                    value="{{ old('price', $product->price ?? '') }}" required>
+        </div>
 
-        <label>Price:</label><br>
-        <input type="number" step="0.01" name="price" value="{{ old('price', $product->price ?? '') }}"><br><br>
+        <!-- 🧩 Category -->
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <input type="text" name="category" class="form-control" 
+                    value="{{ old('category', $product->category ?? '') }}">
+        </div>
 
-        <label>Category:</label><br>
-        <input type="text" name="category" value="{{ old('category', $product->category ?? '') }}"><br><br>
+        <!-- 🧩 Brand -->
+        <div class="mb-3">
+            <label for="brand" class="form-label">Brand</label>
+            <input type="text" name="brand" class="form-control" 
+                    value="{{ old('brand', $product->brand ?? '') }}">
+        </div>
 
-        <label>Brand:</label><br>
-        <input type="text" name="brand" value="{{ old('brand', $product->brand ?? '') }}"><br><br>
+        <!-- 🧩 Expiry Date -->
+        <div class="mb-3">
+            <label for="expiry_date" class="form-label">Expiry Date</label>
+            <input type="date" name="expiry_date" class="form-control" 
+                    value="{{ old('expiry_date', $product->expiry_date ?? '') }}">
+        </div>
 
-        <label>Expiry Date:</label><br>
-        <input type="date" name="expiry_date" value="{{ old('expiry_date', $product->expiry_date ?? '') }}"><br><br>
-
-        <button type="submit">{{ $product ? 'Update' : 'Save' }}</button>
+        <!-- 🧩 Buttons -->
+        <button type="submit" class="btn btn-success">
+            {{ isset($product) ? 'Update' : 'Save' }}
+        </button>
+        <a href="{{ route('products.index') }}" class="btn btn-secondary">Back</a>
     </form>
-
-    <br>
-    <a href="{{ route('products.index') }}">← Back to List</a>
-</body>
-</html>
+@endsection
