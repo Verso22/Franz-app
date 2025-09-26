@@ -5,6 +5,13 @@
 {{-- 🧩 Everything inside here will be placed into the @yield('content') in the layout --}}
 
     <h1>All Products</h1>
+    <!-- 🧩 Wrap the whole products list inside a Bootstrap card -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">📦 All Products</h2>
+        </div>
+        <div class="card-body">
+        {{-- Success message --}}
 
     {{-- 🧩 Success message after adding/updating/deleting --}}
     @if(session('success'))
@@ -12,11 +19,11 @@
     @endif
 
     {{-- 🧩 Top action buttons (only appear once, above the table) --}}
-    <a href="{{ route('products.create') }}" class="btn btn-primary mb-3">+ Add New Product</a>
+    <a href="{{ route('products.create') }}" class="btn btn-success mb-3">+ Add New Product</a>
     <a href="{{ route('products.trash') }}" class="btn btn-secondary mb-3">🗑️ View Trash Bin</a>
 
     <!-- 🧩 Table to show all products -->
-    <table class="table table-striped table-bordered">
+    <table class="table table-hover table-bordered align-middle">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
@@ -35,7 +42,7 @@
                     <td>{{ $product->id }}</td>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->stock }}</td>
-                    <td>{{ $product->price }}</td>
+                    <td>${{ number_format($product->price, 2) }}</td>
                     <td>{{ $product->category }}</td>
                     <td>{{ $product->brand }}</td>
                     <td>{{ $product->expiry_date }}</td>
@@ -66,6 +73,7 @@
     <a href="{{ route('products.trash') }}" class="btn btn-secondary mt-3">🗑️ View Trash Bin</a>
         <!-- 🧩 NEW: Back to Home button (helps user return to homepage) -->
     <a href="{{ url('/') }}" class="btn btn-light mt-2">🏠 Back to Home</a>
-
+    </div>
+</div>    
 
 @endsection
