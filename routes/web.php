@@ -1,44 +1,65 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-| These are the "roads" (URLs) of your app.
-| When someone visits a URL, Laravel decides what should happen.
-| Think of it like a big map for your website 🚗🗺️
+| Think of this file as your app’s map 🗺️
+| Every route here defines what page a URL should show.
+|--------------------------------------------------------------------------
 */
 
-// 🏠 Redirect home ("/") to the products list
+// 🏠 Redirect home ("/") to the dashboard (main landing page)
 Route::get('/', function () {
-    return redirect()->route('products.index');
+    return redirect()->route('dashboard');
 });
 
-// 📋 Show all products
+
+// ==============================================
+// 🧭 Dashboard Route
+// ==============================================
+Route::get('/dashboard', function () {
+    // Loads resources/views/dashboard.blade.php
+    return view('dashboard');
+})->name('dashboard');
+
+
+// ==============================================
+// 🛍️ Products Routes (CRUD logic)
+// ==============================================
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-
-// ➕ Show the "Add New Product" form
 Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-
-// 💾 Save a new product (this runs when you press "Save" on the form)
 Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-
-// ✏️ Show the "Edit Product" form
 Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-
-// 🔄 Update a product (this runs when you press "Update" on the form)
 Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-
-// 🗑️ Soft delete a product (moves it to trash)
 Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-
-// 🗂️ Show all products that are in the trash
 Route::get('/products/trash', [ProductController::class, 'trash'])->name('products.trash');
-
-// 🔙 Restore a product from trash
 Route::patch('/products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
-
-// 🚮 Permanently delete a product from trash (optional)
 Route::delete('/products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.forceDelete');
+
+
+// ==============================================
+// 👥 Employees Page (UI only for now)
+// ==============================================
+Route::get('/employees', function () {
+    return view('employees');
+})->name('employees');
+
+
+// ==============================================
+// 💰 Transactions Page (UI only for now)
+// ==============================================
+Route::get('/transactions', function () {
+    return view('transactions');
+})->name('transactions');
+
+
+// ==============================================
+// 📈 Reports Page (UI only for now)
+// ==============================================
+Route::get('/reports', function () {
+    return view('reports');
+})->name('reports');

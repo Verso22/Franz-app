@@ -1,79 +1,177 @@
-@extends('layouts.app')  
-{{-- 🧩 This means: "use the layout from layouts/app.blade.php" --}}
+{{-- ============================================== --}}
+{{-- File: resources/views/products.blade.php --}}
+{{-- Purpose: Product management UI (modern dashboard design) --}}
+{{-- ============================================== --}}
 
-@section('content')  
-{{-- 🧩 Everything inside here will be placed into the @yield('content') in the layout --}}
+@extends('layouts.app')
+{{-- 🧠 Uses our main layout (dark sidebar, top navbar) --}}
 
-    <h1>All Products</h1>
-    <!-- 🧩 Wrap the whole products list inside a Bootstrap card -->
-    <div class="card shadow-lg mb-4">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0">📦 All Products</h2>
-        </div>
-        <div class="card-body">
-        {{-- Success message --}}
+@section('title', 'Products')
 
-    {{-- 🧩 Success message after adding/updating/deleting --}}
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+@section('content')
+<div class="container-fluid py-4">
+    {{-- 🧱 Page Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Products</h2>
 
-    {{-- 🧩 Top action buttons (only appear once, above the table) --}}
-    <a href="{{ route('products.create') }}" class="btn btn-success mb-3">+ Add New Product</a>
-    <a href="{{ route('products.trash') }}" class="btn btn-secondary mb-3">🗑️ View Trash Bin</a>
-
-    <!-- 🧩 Table to show all products -->
-    <table class="table table-hover table-bordered align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Stock</th>
-                <th>Price</th>
-                <th>Category</th>
-                <th>Brand</th>
-                <th>Expiry Date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($products as $product)
-                <tr>
-                    <td>{{ $product->id }}</td>
-                    <td>{{ $product->name }}</td>
-                    <td>{{ $product->stock }}</td>
-                    <td>${{ number_format($product->price, 2) }}</td>
-                    <td>{{ $product->category }}</td>
-                    <td>{{ $product->brand }}</td>
-                    <td>{{ $product->expiry_date }}</td>
-                    <td>
-                        <!-- 🧩 Edit button (yellow small button) -->
-                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">Edit</a>
-
-                        <!-- 🧩 Delete button (red small button) -->
-                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <!-- 🧩 If there are no products, show this -->
-                <tr>
-                    <td colspan="8" class="text-center">No products found.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-        <!-- 🧩 NEW: Trash Bin button placed at the bottom of the table -->
-    <!-- This gives the user another shortcut to view deleted products -->
-    <a href="{{ route('products.trash') }}" class="btn btn-secondary mt-3">🗑️ View Trash Bin</a>
-        <!-- 🧩 NEW: Back to Home button (helps user return to homepage) -->
-    <a href="{{ url('/') }}" class="btn btn-light mt-2">🏠 Back to Home</a>
+        {{-- ➕ Add Product Button --}}
+        <a href="#" class="btn btn-primary shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i> Add Product
+        </a>
     </div>
-</div>    
 
+    {{-- 📦 Summary Cards (Optional, for visual balance) --}}
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-3 dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-primary text-white rounded-3 p-3 me-3">
+                        <i class="bi bi-box-seam fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">120</h5>
+                        <small class="text-muted">Total Products</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-3 dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-success text-white rounded-3 p-3 me-3">
+                        <i class="bi bi-tags fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">8</h5>
+                        <small class="text-muted">Categories</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-3 dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-warning text-white rounded-3 p-3 me-3">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">5</h5>
+                        <small class="text-muted">Low Stock</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- 📋 Product Table --}}
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Product List</h5>
+            <div class="table-responsive">
+                <table class="table align-middle table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{-- 🧪 Temporary sample data (replace with @foreach later) --}}
+                        <tr>
+                            <td>1</td>
+                            <td>Chocolate Bar</td>
+                            <td>Snacks</td>
+                            <td>35</td>
+                            <td>{{ rupiah(5000) }}</td>
+            {{-- If dynamic: <td>{{ rupiah($product->price) }}</td> --}}
+
+                            <td>2025-10-15</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Instant Noodles</td>
+                            <td>Food</td>
+                            <td>62</td>
+                            <td>{{ rupiah(3500) }}</td>
+                            <td>2025-10-10</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Mineral Water</td>
+                            <td>Beverage</td>
+                            <td>120</td>
+                            <td>{{ rupiah(3000) }}</td>
+                            <td>2025-10-05</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- 🎨 Inline style tweaks (same visual tone as dashboard) --}}
+<style>
+    .dashboard-card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .table td {
+        color: #555;
+    }
+
+    .btn-outline-secondary:hover i,
+    .btn-outline-danger:hover i {
+        color: white;
+    }
+</style>
 @endsection

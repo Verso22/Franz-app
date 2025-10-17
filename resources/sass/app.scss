@@ -1,0 +1,8 @@
+// ✅ Import Bootstrap’s SCSS so we can use its styles
+@import "bootstrap/scss/bootstrap";
+
+// ✅ Optional custom styles (you can add more later)
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
