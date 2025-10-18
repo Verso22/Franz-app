@@ -121,6 +121,6 @@ class ProductController extends Controller
         $product = Product::onlyTrashed()->where('id', $id)->firstOrFail();
         $product->forceDelete();
 
-        return redirect()->route('products.trash')->with('success', 'Product permanently deleted.');
+        return redirect()->route('products.trash')->with('danger', 'Product permanently deleted!');
     }
 }

@@ -36,8 +36,11 @@ Route::post('/products', [ProductController::class, 'store'])->name('products.st
 Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
 Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+// 🗂️ Show all products that are in the trash
 Route::get('/products/trash', [ProductController::class, 'trash'])->name('products.trash');
+// 🔙 Restore a product from trash
 Route::patch('/products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
+// 🚮 Permanently delete a product from trash
 Route::delete('/products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.forceDelete');
 
 

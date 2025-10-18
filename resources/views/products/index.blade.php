@@ -15,7 +15,7 @@
         <h2 class="fw-bold mb-0">Products</h2>
 
         {{-- ➕ Add Product Button --}}
-        <a href="#" class="btn btn-primary shadow-sm px-4">
+        <a href="{{ route('products.create') }}" class="btn btn-primary shadow-sm px-4">
             <i class="bi bi-plus-circle me-2"></i> Add Product
         </a>
     </div>
@@ -172,6 +172,41 @@
     .btn-outline-secondary:hover i,
     .btn-outline-danger:hover i {
         color: white;
+    }
+</style>
+    {{-- 🧭 Floating Trash Button --}}
+    <a href="{{ route('products.trash') }}" 
+        class="btn btn-secondary shadow-lg d-flex align-items-center gap-2 floating-trash-btn">
+            <i class="bi bi-trash fs-5"></i>
+            <span>View Trash</span>
+    </a>
+
+    {{-- 🧠 Styles for Floating Button --}}
+    <style>
+    .floating-trash-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #6c757d;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 18px;
+        font-weight: 500;
+        color: #fff;
+        transition: all 0.25s ease;
+        z-index: 1050;
+    }
+
+    .floating-trash-btn:hover {
+        background-color: #5a6268;
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .floating-trash-btn i {
+        font-size: 1.2rem;
     }
 </style>
 @endsection
