@@ -1,11 +1,9 @@
 {{-- ============================================== --}}
-{{-- File: resources/views/products.blade.php --}}
-{{-- Purpose: Product management UI (modern dashboard design) --}}
+{{-- File: resources/views/products/index.blade.php --}}
+{{-- Purpose: Product management UI (modern dashboard design + role-based visibility) --}}
 {{-- ============================================== --}}
 
 @extends('layouts.app')
-{{-- 🧠 Uses our main layout (dark sidebar, top navbar) --}}
-
 @section('title', 'Products')
 
 @section('content')
@@ -14,13 +12,15 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Products</h2>
 
-        {{-- ➕ Add Product Button --}}
-        <a href="{{ route('products.create') }}" class="btn btn-primary shadow-sm px-4">
-            <i class="bi bi-plus-circle me-2"></i> Add Product
-        </a>
+        {{-- ➕ Add Product Button (Admin Only) --}}
+        @if(auth()->check() && auth()->user()->isAdmin())
+            <a href="{{ route('products.create') }}" class="btn btn-primary shadow-sm px-4">
+                <i class="bi bi-plus-circle me-2"></i> Add Product
+            </a>
+        @endif
     </div>
 
-    {{-- 📦 Summary Cards (Optional, for visual balance) --}}
+    {{-- 📦 Summary Cards --}}
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card shadow-sm border-0 p-3 dashboard-card">
@@ -83,25 +83,29 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- 🧪 Temporary sample data (replace with @foreach later) --}}
+                        {{-- 🧪 Example Data (replace with @foreach later) --}}
                         <tr>
                             <td>1</td>
                             <td>Chocolate Bar</td>
                             <td>Snacks</td>
                             <td>35</td>
                             <td>{{ rupiah(5000) }}</td>
-            {{-- If dynamic: <td>{{ rupiah($product->price) }}</td> --}}
-
                             <td>2025-10-15</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary me-1">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                {{-- ✏️ Edit/Delete only visible for Admin --}}
+                                @if(auth()->check() && auth()->user()->isAdmin())
+                                    <button class="btn btn-sm btn-outline-secondary me-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                @else
+                                    <span class="text-muted">View Only</span>
+                                @endif
                             </td>
                         </tr>
+
                         <tr>
                             <td>2</td>
                             <td>Instant Noodles</td>
@@ -110,14 +114,19 @@
                             <td>{{ rupiah(3500) }}</td>
                             <td>2025-10-10</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary me-1">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                @if(auth()->check() && auth()->user()->isAdmin())
+                                    <button class="btn btn-sm btn-outline-secondary me-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                @else
+                                    <span class="text-muted">View Only</span>
+                                @endif
                             </td>
                         </tr>
+
                         <tr>
                             <td>3</td>
                             <td>Mineral Water</td>
@@ -126,12 +135,16 @@
                             <td>{{ rupiah(3000) }}</td>
                             <td>2025-10-05</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary me-1">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                @if(auth()->check() && auth()->user()->isAdmin())
+                                    <button class="btn btn-sm btn-outline-secondary me-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                @else
+                                    <span class="text-muted">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     </tbody>
@@ -141,72 +154,67 @@
     </div>
 </div>
 
-{{-- 🎨 Inline style tweaks (same visual tone as dashboard) --}}
-<style>
-    .dashboard-card {
-        transition: all 0.3s ease;
-        border-radius: 12px;
-    }
-    .dashboard-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    .icon-box {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .table th {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .table td {
-        color: #555;
-    }
-
-    .btn-outline-secondary:hover i,
-    .btn-outline-danger:hover i {
-        color: white;
-    }
-</style>
-    {{-- 🧭 Floating Trash Button --}}
+{{-- 🧭 Floating Trash Button (Admin Only) --}}
+@if(auth()->check() && auth()->user()->isAdmin())
     <a href="{{ route('products.trash') }}" 
-        class="btn btn-secondary shadow-lg d-flex align-items-center gap-2 floating-trash-btn">
-            <i class="bi bi-trash fs-5"></i>
-            <span>View Trash</span>
+       class="btn btn-secondary shadow-lg d-flex align-items-center gap-2 floating-trash-btn">
+        <i class="bi bi-trash fs-5"></i>
+        <span>View Trash</span>
     </a>
+@endif
 
-    {{-- 🧠 Styles for Floating Button --}}
-    <style>
-    .floating-trash-btn {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background-color: #6c757d;
-        border: none;
-        border-radius: 50px;
-        padding: 10px 18px;
-        font-weight: 500;
-        color: #fff;
-        transition: all 0.25s ease;
-        z-index: 1050;
-    }
+{{-- 💅 Page-specific styles --}}
+<style>
+.dashboard-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+.icon-box {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.table th {
+    font-weight: 600;
+    color: #333;
+}
+.table td {
+    color: #555;
+}
+.btn-outline-secondary:hover i,
+.btn-outline-danger:hover i {
+    color: white;
+}
 
-    .floating-trash-btn:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-        color: #fff;
-        text-decoration: none;
-    }
-
-    .floating-trash-btn i {
-        font-size: 1.2rem;
-    }
+/* Floating Trash Button */
+.floating-trash-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #6c757d;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 18px;
+    font-weight: 500;
+    color: #fff;
+    transition: all 0.25s ease;
+    z-index: 1050;
+}
+.floating-trash-btn:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    color: #fff;
+    text-decoration: none;
+}
+.floating-trash-btn i {
+    font-size: 1.2rem;
+}
 </style>
 @endsection

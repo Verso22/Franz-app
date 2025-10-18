@@ -1,6 +1,6 @@
 {{-- ============================================== --}}
 {{-- File: resources/views/products/trash.blade.php --}}
-{{-- Purpose: Modern Trash Bin page for deleted products --}}
+{{-- Purpose: Modern Trash Bin page for deleted products (role-based control + clean) --}}
 {{-- ============================================== --}}
 
 @extends('layouts.app')
@@ -9,6 +9,7 @@
 
 @section('content')
 <div class="container-fluid">
+
     {{-- 🧱 Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">
@@ -44,42 +45,38 @@
                     <tbody>
                         @forelse($products as $product)
                         <tr>
-                            <td>{{ $loop->iteration }}</td> {{-- Auto numbering (1, 2, 3…) --}}
-                            <td>{{ $product->name }}</td> {{-- Product name from database --}}
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $product->name }}</td>
                             <td>{{ $product->category }}</td>
                             <td>{{ $product->brand }}</td>
-                            <td>{{ rupiah($product->price) }}</td> {{-- Converts number to Rp format --}}
+                            <td>{{ rupiah($product->price) }}</td>
                             <td>{{ $product->deleted_at->format('Y-m-d') }}</td>
                             <td class="text-center">
-                                {{-- 🟢 Restore --}}
-                                <form action="{{ route('products.restore', $product->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn btn-sm btn-outline-success me-2">
-                                        <i class="bi bi-arrow-clockwise"></i> Restore
-                                    </button>
-                                </form>
+                                @if(auth()->check() && auth()->user()->isAdmin())
+                                    {{-- 🟢 Restore --}}
+                                    <form action="{{ route('products.restore', $product->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm btn-outline-success me-2">
+                                            <i class="bi bi-arrow-clockwise"></i> Restore
+                                        </button>
+                                    </form>
 
                                     {{-- 🔴 Delete permanently --}}
-                                    <form action="{{ route('products.forceDelete', $product->id) }}" method="POST" class="d-inline" 
-                                        onsubmit="return confirm('Are you sure you want to permanently delete this product?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash3"></i> Delete Permanently
-                                    </button>
-                                </form>
+                                    <form action="{{ route('products.forceDelete', $product->id) }}" method="POST" class="d-inline"
+                                            onsubmit="return confirm('Are you sure you want to permanently delete this product?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash3"></i> Delete Permanently
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-muted">No Actions Available</span>
+                                @endif
                             </td>
                         </tr>
                         @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                Trash is empty.
-                            </td>
-                        </tr>
-                        @endforelse
-
                         {{-- 🧱 Empty state --}}
                         <tr>
                             <td colspan="7" class="text-center py-4 text-muted">
@@ -87,6 +84,7 @@
                                 Trash is empty.
                             </td>
                         </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -117,7 +115,6 @@
     transition: all 0.25s ease;
     z-index: 1050;
 }
-
 .floating-back-btn:hover {
     background-color: #5a6268;
     transform: scale(1.05);
@@ -130,16 +127,13 @@
 .card {
     border-radius: 1rem;
 }
-
 .table-hover tbody tr:hover {
     background-color: rgba(255, 0, 0, 0.05);
 }
-
 .btn-outline-danger:hover {
     background-color: #dc3545;
     color: #fff;
 }
-
 .btn-outline-success:hover {
     background-color: #198754;
     color: #fff;
