@@ -238,12 +238,22 @@ body {
     </ul>
 
     {{-- 🔴 Logout --}}
-    <div class="mt-auto">
-        <a href="#" class="nav-link text-danger">
-            <i class="bi bi-box-arrow-right"></i>
+    <form action="{{ route('logout') }}" method="POST" class="mt-auto">
+        @csrf
+        <button type="submit" class="nav-link text-danger border-0 bg-transparent w-100 text-start">
+            <i class="bi bi-box-arrow-right"></i> 
             <span class="sidebar-text">Logout</span>
+        </button>
+    </form>
+
+    {{-- 👤 Profile --}}
+    <li>
+        <a href="{{ route('profile') }}"
+            class="nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
+            <i class="bi bi-person"></i>
+            <span class="sidebar-text">Profile</span>
         </a>
-    </div>
+    </li>
 </div>
 
 {{-- ===================== Main Content ===================== --}}
