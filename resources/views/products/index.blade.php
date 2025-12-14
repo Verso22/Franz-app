@@ -1,6 +1,6 @@
 {{-- ============================================== --}}
 {{-- File: resources/views/products/index.blade.php --}}
-{{-- Purpose: Product management UI (modern dashboard design + role-based visibility) --}}
+{{-- Purpose: REAL Product management UI (DB-connected) --}}
 {{-- ============================================== --}}
 
 @extends('layouts.app')
@@ -8,6 +8,7 @@
 
 @section('content')
 <div class="container-fluid py-4">
+
     {{-- 🧱 Page Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Products</h2>
@@ -20,8 +21,10 @@
         @endif
     </div>
 
-    {{-- 📦 Summary Cards --}}
+    {{-- 📦 Summary Cards (REAL DATA) --}}
     <div class="row g-3 mb-4">
+
+        {{-- Total Products --}}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 p-3 dashboard-card">
                 <div class="d-flex align-items-center">
@@ -29,13 +32,14 @@
                         <i class="bi bi-box-seam fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="mb-0 fw-bold">120</h5>
+                        <h5 class="mb-0 fw-bold">{{ $totalProducts }}</h5>
                         <small class="text-muted">Total Products</small>
                     </div>
                 </div>
             </div>
         </div>
 
+        {{-- Categories --}}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 p-3 dashboard-card">
                 <div class="d-flex align-items-center">
@@ -43,13 +47,14 @@
                         <i class="bi bi-tags fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="mb-0 fw-bold">8</h5>
+                        <h5 class="mb-0 fw-bold">{{ $totalCategories }}</h5>
                         <small class="text-muted">Categories</small>
                     </div>
                 </div>
             </div>
         </div>
 
+        {{-- Low Stock --}}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 p-3 dashboard-card">
                 <div class="d-flex align-items-center">
@@ -57,18 +62,20 @@
                         <i class="bi bi-exclamation-triangle fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="mb-0 fw-bold">5</h5>
-                        <small class="text-muted">Low Stock</small>
+                        <h5 class="mb-0 fw-bold">{{ $lowStockCount }}</h5>
+                        <small class="text-muted">Low Stock (≤ 5)</small>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     {{-- 📋 Product Table --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <h5 class="fw-bold mb-3">Product List</h5>
+
             <div class="table-responsive">
                 <table class="table align-middle table-hover">
                     <thead class="table-light">
@@ -82,72 +89,52 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {{-- 🧪 Example Data (replace with @foreach later) --}}
-                        <tr>
-                            <td>1</td>
-                            <td>Chocolate Bar</td>
-                            <td>Snacks</td>
-                            <td>35</td>
-                            <td>{{ rupiah(5000) }}</td>
-                            <td>2025-10-15</td>
-                            <td>
-                                {{-- ✏️ Edit/Delete only visible for Admin --}}
-                                @if(auth()->check() && auth()->user()->isAdmin())
-                                    <button class="btn btn-sm btn-outline-secondary me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                @else
-                                    <span class="text-muted">View Only</span>
-                                @endif
-                            </td>
-                        </tr>
+                        @forelse ($products as $index => $product)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $product->name }}</td>
+                                <td>{{ $product->category ?? '-' }}</td>
+                                <td>{{ $product->stock }}</td>
+                                <td>{{ rupiah($product->price) }}</td>
+                                <td>{{ $product->created_at->format('Y-m-d') }}</td>
+                                <td>
+                                    @if(auth()->check() && auth()->user()->isAdmin())
 
-                        <tr>
-                            <td>2</td>
-                            <td>Instant Noodles</td>
-                            <td>Food</td>
-                            <td>62</td>
-                            <td>{{ rupiah(3500) }}</td>
-                            <td>2025-10-10</td>
-                            <td>
-                                @if(auth()->check() && auth()->user()->isAdmin())
-                                    <button class="btn btn-sm btn-outline-secondary me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                @else
-                                    <span class="text-muted">View Only</span>
-                                @endif
-                            </td>
-                        </tr>
+                                        {{-- ✏️ Edit --}}
+                                        <a href="{{ route('products.edit', $product->id) }}"
+                                           class="btn btn-sm btn-outline-secondary me-1">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
 
-                        <tr>
-                            <td>3</td>
-                            <td>Mineral Water</td>
-                            <td>Beverage</td>
-                            <td>120</td>
-                            <td>{{ rupiah(3000) }}</td>
-                            <td>2025-10-05</td>
-                            <td>
-                                @if(auth()->check() && auth()->user()->isAdmin())
-                                    <button class="btn btn-sm btn-outline-secondary me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                @else
-                                    <span class="text-muted">View Only</span>
-                                @endif
-                            </td>
-                        </tr>
+                                        {{-- 🗑️ Delete --}}
+                                        <form action="{{ route('products.destroy', $product->id) }}"
+                                              method="POST"
+                                              class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Delete this product?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+
+                                    @else
+                                        <span class="text-muted">View Only</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No products found.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -156,7 +143,7 @@
 
 {{-- 🧭 Floating Trash Button (Admin Only) --}}
 @if(auth()->check() && auth()->user()->isAdmin())
-    <a href="{{ route('products.trash') }}" 
+    <a href="{{ route('products.trash') }}"
        class="btn btn-secondary shadow-lg d-flex align-items-center gap-2 floating-trash-btn">
         <i class="bi bi-trash fs-5"></i>
         <span>View Trash</span>
