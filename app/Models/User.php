@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,9 +13,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * 🧠 Mass assignable fields
      */
     protected $fillable = [
         'name',
@@ -25,9 +23,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * 🔐 Hidden fields
      */
     protected $hidden = [
         'password',
@@ -35,21 +31,33 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * 🔄 Attribute casting
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
+
+    /**
+     * 👶 Simple role check: is admin?
+     */
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
 
-    public function isEmployee()
+    /**
+     * 🧺 User has MANY carts
+     */
+    public function carts()
     {
-        return $this->role === 'employee';
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
+     * 🧺 Get ACTIVE cart only
+     */
+    public function activeCart()
+    {
+        return $this->hasOne(Cart::class)->where('status', 'active');
     }
 }

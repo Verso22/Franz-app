@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +29,17 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
 
+// ==============================================
+// 🛍️ Customer Storefront
+// ==============================================
+Route::get('/store', [StoreController::class, 'index'])
+    ->name('store.index');
+
+// ==============================================
+// 🛒 Cart Routes (Customer only)
+// ==============================================
+Route::post('/cart/add/{product}', [CartController::class, 'add'])
+    ->name('cart.add');
 
 // ==============================================
 // 🛍️ Products Routes (with role protection)

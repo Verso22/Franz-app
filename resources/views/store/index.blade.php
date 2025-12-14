@@ -1,6 +1,6 @@
 {{-- ============================================== --}}
 {{-- File: resources/views/store/index.blade.php --}}
-{{-- Purpose: Customer Storefront (product browsing only, no cart yet) --}}
+{{-- Purpose: Customer Storefront (Add to Cart enabled) --}}
 {{-- ============================================== --}}
 
 @extends('layouts.store')
@@ -18,24 +18,57 @@
         </p>
     </div>
 
-    {{-- 📦 Product List (placeholder for now) --}}
+    {{-- 📦 Product Grid --}}
     <div class="row g-4">
 
-        {{-- Example product card --}}
-        <div class="col-md-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="fw-semibold">Example Product</h5>
-                    <p class="text-muted mb-2">Category</p>
-                    <p class="fw-bold">{{ rupiah(10000) }}</p>
+        @if($products->count() === 0)
+            <div class="col-12 text-center text-muted">
+                No products available.
+            </div>
+        @endif
 
-                    {{-- Disabled for now --}}
-                    <button class="btn btn-outline-primary w-100" disabled>
-                        Add to Cart
-                    </button>
+        @foreach($products as $product)
+
+            @php
+                $outOfStock = $product->stock <= 0;
+            @endphp
+
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm {{ $outOfStock ? 'opacity-50' : '' }}">
+                    <div class="card-body text-center">
+
+                        <h5 class="fw-semibold">{{ $product->name }}</h5>
+
+                        <p class="text-muted mb-1">
+                            {{ $product->category ?? '-' }}
+                        </p>
+
+                        <p class="fw-bold mb-2">
+                            {{ rupiah($product->price) }}
+                        </p>
+
+                        @if($outOfStock)
+                            <span class="badge bg-danger mb-3">Out of Stock</span>
+
+                            <button class="btn btn-outline-secondary w-100" disabled>
+                                Out of Stock
+                            </button>
+                        @else
+                            <span class="badge bg-success mb-3">In Stock</span>
+
+                            <form method="POST" action="{{ route('cart.add', $product) }}">
+                                @csrf
+                                <button class="btn btn-outline-primary w-100">
+                                    Add to Cart
+                                </button>
+                            </form>
+                        @endif
+
+                    </div>
                 </div>
             </div>
-        </div>
+
+        @endforeach
 
     </div>
 </div>
