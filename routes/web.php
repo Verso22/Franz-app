@@ -7,6 +7,7 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/cart/add/{product}', [CartController::class, 'add'])
         ->name('cart.add');
+
+    Route::patch('/cart/update/{item}', [CartController::class, 'update'])
+        ->name('cart.update');
 
     Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])
         ->name('cart.remove');
@@ -102,9 +106,11 @@ Route::middleware([IsAdmin::class])->group(function () {
 // ==============================================
 // 💰 Transactions
 // ==============================================
-Route::get('/transactions', function () {
-    return view('transactions');
-})->name('transactions');
+Route::get('/transactions', [TransactionController::class, 'index'])
+    ->name('transactions.index');
+
+Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])
+    ->name('transactions.show');
 
 // ==============================================
 // 📈 Reports

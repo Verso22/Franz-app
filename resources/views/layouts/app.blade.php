@@ -220,8 +220,8 @@ body {
 
         {{-- 🛒 Transactions --}}
         <li>
-            <a href="{{ route('transactions') }}"
-                class="nav-link {{ request()->routeIs('transactions') ? 'active' : '' }}">
+            <a href="{{ route('transactions.index') }}"
+                class="nav-link {{ request()->routeIs('transactions.index') ? 'active' : '' }}">
                 <i class="bi bi-cart"></i>
                 <span class="sidebar-text">Transactions</span>
             </a>
