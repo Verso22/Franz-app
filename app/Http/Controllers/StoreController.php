@@ -3,20 +3,51 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class StoreController extends Controller
 {
     /**
-     * 🏪 Customer storefront
-     * Show products for customers (read-only)
+     * 🏪 Storefront (product list + search + filters)
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 👶 Get all products, newest first
-        // We still fetch all, but UI will handle out-of-stock
-        $products = Product::orderBy('id', 'desc')->get();
+        // 👶 Get filters from URL
+        $search   = $request->query('q');
+        $category = $request->query('category');
+        $brand    = $request->query('brand');
 
-        // 👶 Send products to the store view
+        // 👶 Base query: newest products first
+        $query = Product::orderBy('id', 'desc');
+
+        // 🔍 Search by product name
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        // 🏷️ Filter by category
+        if ($category) {
+            $query->where('category', $category);
+        }
+
+        // 🏭 Filter by brand
+        if ($brand) {
+            $query->where('brand', $brand);
+        }
+
+        // 👶 Execute query
+        $products = $query->get();
+
+        // 👶 Send to storefront
         return view('store.index', compact('products'));
+    }
+
+    /**
+     * 📄 Product detail page (READ ONLY)
+     */
+    public function show(Product $product)
+    {
+        // 👶 Laravel auto-finds product by ID
+        return view('store.show', compact('product'));
     }
 }

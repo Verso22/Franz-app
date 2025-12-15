@@ -33,7 +33,8 @@
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
             <form action="{{ isset($product) ? route('products.update', $product->id) : route('products.store') }}" 
-                  method="POST">
+                  method="POST"
+                  enctype="multipart/form-data"> {{-- 🖼️ NEW --}}
                 @csrf
                 @if(isset($product))
                     @method('PUT')
@@ -99,6 +100,21 @@
                             <input type="date" class="form-control" id="expiry_date" name="expiry_date"
                                    value="{{ old('expiry_date', $product->expiry_date ?? '') }}">
                         </div>
+
+                        {{-- 🖼️ Product Image --}}
+                        <div class="mb-3">
+                            <label for="image" class="form-label fw-semibold">Product Image (optional)</label>
+                            <input type="file" class="form-control" id="image" name="image">
+                        </div>
+
+                        {{-- 🖼️ Image Preview --}}
+                        @if(isset($product) && $product->image)
+                            <div class="mb-3">
+                                <img src="{{ asset('storage/' . $product->image) }}"
+                                     class="img-thumbnail"
+                                     style="max-width: 150px;">
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -125,21 +141,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const pricePreview = document.getElementById('pricePreview');
     const alertBox = document.getElementById('alertMessage');
 
-    // 💸 Function to format number as Rupiah
     function formatRupiah(angka) {
         if (!angka) return 'Rp 0';
         const number = parseInt(angka, 10);
         return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
-    // Update preview live while typing
     if (priceInput) {
         priceInput.addEventListener('input', function () {
             pricePreview.textContent = formatRupiah(priceInput.value);
         });
     }
 
-    // 🧩 Auto-hide success alert after 3 seconds
     if (alertBox) {
         setTimeout(() => {
             alertBox.classList.remove('show');
@@ -151,38 +164,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 {{-- 💅 Form Styles --}}
 <style>
-    .card {
-        border-radius: 1rem;
-    }
-
-    .form-label {
-        font-size: 0.95rem;
-    }
-
-    .form-control, .input-group-text {
-        border-radius: 0.5rem;
-    }
-
-    .btn {
-        border-radius: 0.5rem;
-    }
-
-    .form-text {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    #alertMessage {
-        border-radius: 0.5rem;
-        font-weight: 500;
-        margin-bottom: 1.5rem;
-        transition: opacity 0.4s ease;
-    }
-
-    @media (max-width: 768px) {
-        .col-md-6 {
-            width: 100%;
-        }
-    }
+    .card { border-radius: 1rem; }
+    .form-label { font-size: 0.95rem; }
+    .form-control, .input-group-text { border-radius: 0.5rem; }
+    .btn { border-radius: 0.5rem; }
+    .form-text { font-size: 0.85rem; color: #6c757d; }
+    #alertMessage { border-radius: 0.5rem; font-weight: 500; margin-bottom: 1.5rem; transition: opacity 0.4s ease; }
 </style>
 @endsection

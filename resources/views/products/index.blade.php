@@ -1,6 +1,6 @@
 {{-- ============================================== --}}
 {{-- File: resources/views/products/index.blade.php --}}
-{{-- Purpose: REAL Product management UI (DB-connected) --}}
+{{-- Purpose: REAL Product management UI (DB-connected + Search & Filters) --}}
 {{-- ============================================== --}}
 
 @extends('layouts.app')
@@ -20,6 +20,67 @@
             </a>
         @endif
     </div>
+
+    {{-- 🔍 SEARCH & FILTER (ADMIN) --}}
+    <form method="GET" action="{{ route('products.index') }}" class="mb-4">
+        <div class="row g-3 align-items-end">
+
+            {{-- Search --}}
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Search</label>
+                <input
+                    type="text"
+                    name="q"
+                    class="form-control"
+                    placeholder="Search product name..."
+                    value="{{ request('q') }}"
+                >
+            </div>
+
+            {{-- Category --}}
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All</option>
+                    @foreach($products->pluck('category')->filter()->unique() as $category)
+                        <option value="{{ $category }}"
+                            {{ request('category') == $category ? 'selected' : '' }}>
+                            {{ $category }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Brand --}}
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Brand</label>
+                <select name="brand" class="form-select">
+                    <option value="">All</option>
+                    @foreach($products->pluck('brand')->filter()->unique() as $brand)
+                        <option value="{{ $brand }}"
+                            {{ request('brand') == $brand ? 'selected' : '' }}>
+                            {{ $brand }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="col-md-2 d-grid gap-2">
+                <button class="btn btn-primary">
+                    Apply
+                </button>
+
+                @if(request()->hasAny(['q', 'category', 'brand']))
+                    <a href="{{ route('products.index') }}"
+                       class="btn btn-outline-secondary">
+                        Clear
+                    </a>
+                @endif
+            </div>
+
+        </div>
+    </form>
 
     {{-- 📦 Summary Cards (REAL DATA) --}}
     <div class="row g-3 mb-4">
@@ -81,6 +142,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
+                            <th>Image</th>
                             <th>Product Name</th>
                             <th>Category</th>
                             <th>Stock</th>
@@ -94,11 +156,25 @@
                         @forelse ($products as $index => $product)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
+
+                                {{-- 🖼 Product Image --}}
+                                <td>
+                                    @if($product->image)
+                                        <img
+                                            src="{{ asset('storage/' . $product->image) }}"
+                                            alt="{{ $product->name }}"
+                                            class="product-thumb">
+                                    @else
+                                        <span class="text-muted small">No Image</span>
+                                    @endif
+                                </td>
+
                                 <td>{{ $product->name }}</td>
                                 <td>{{ $product->category ?? '-' }}</td>
                                 <td>{{ $product->stock }}</td>
                                 <td>{{ rupiah($product->price) }}</td>
                                 <td>{{ $product->created_at->format('Y-m-d') }}</td>
+
                                 <td>
                                     @if(auth()->check() && auth()->user()->isAdmin())
 
@@ -128,7 +204,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     No products found.
                                 </td>
                             </tr>
@@ -174,9 +250,15 @@
 .table td {
     color: #555;
 }
-.btn-outline-secondary:hover i,
-.btn-outline-danger:hover i {
-    color: white;
+
+/* 🖼 Product image thumbnail */
+.product-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
 }
 
 /* Floating Trash Button */
@@ -185,7 +267,6 @@
     bottom: 30px;
     right: 30px;
     background-color: #6c757d;
-    border: none;
     border-radius: 50px;
     padding: 10px 18px;
     font-weight: 500;
@@ -199,9 +280,6 @@
     box-shadow: 0 6px 16px rgba(0,0,0,0.2);
     color: #fff;
     text-decoration: none;
-}
-.floating-trash-btn i {
-    font-size: 1.2rem;
 }
 </style>
 @endsection

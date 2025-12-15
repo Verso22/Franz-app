@@ -21,5 +21,6 @@ class Product extends Model
         'category',
         'brand',
         'expiry_date',
+        'image', // 🖼️ product image path (nullable)
     ];
 }

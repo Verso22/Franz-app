@@ -1,6 +1,6 @@
 {{-- ============================================== --}}
 {{-- File: resources/views/layouts/store.blade.php --}}
-{{-- Purpose: Simple layout for customer storefront --}}
+{{-- Purpose: Customer layout with Cart button --}}
 {{-- ============================================== --}}
 
 <!DOCTYPE html>
@@ -24,12 +24,19 @@
             🏪 MyStore
         </a>
 
-        <div class="ms-auto">
-            <span class="me-3 text-muted">
-                Hello, {{ auth()->user()->name ?? 'Guest' }}
+        <div class="ms-auto d-flex align-items-center gap-3">
+
+            {{-- 🛒 Cart Button --}}
+            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary">
+                <i class="bi bi-cart"></i> Cart
+            </a>
+
+            <span class="text-muted">
+                {{ auth()->check() ? auth()->user()->name : 'Guest' }}
             </span>
 
-            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button class="btn btn-outline-danger btn-sm">
                     Logout
@@ -39,7 +46,6 @@
     </div>
 </nav>
 
-{{-- 🧱 Page Content --}}
 <main>
     @yield('content')
 </main>

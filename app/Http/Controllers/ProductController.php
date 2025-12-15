@@ -4,25 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     /**
-     * 📋 Show list of products (REAL DATA)
+     * 📋 Show list of products (SEARCH + FILTER)
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Get all products (latest first)
-        $products = Product::orderBy('id', 'desc')->get();
+        // 🔍 Get filters from URL
+        $search   = $request->query('q');
+        $category = $request->query('category');
+        $brand    = $request->query('brand');
 
-        // Dashboard statistics (REAL, not gimmick)
+        // 👶 Base query
+        $query = Product::orderBy('id', 'desc');
+
+        // 🔍 Search by name
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        // 🏷️ Filter by category
+        if ($category) {
+            $query->where('category', $category);
+        }
+
+        // 🏭 Filter by brand
+        if ($brand) {
+            $query->where('brand', $brand);
+        }
+
+        // 👶 Execute query
+        $products = $query->get();
+
+        // 📊 REAL stats (based on filtered results)
         $totalProducts = $products->count();
 
         $totalCategories = $products
-            ->pluck('category')     // get only category column
-            ->filter()              // remove null values
-            ->unique()              // unique categories
-            ->count();              // count them
+            ->pluck('category')
+            ->filter()
+            ->unique()
+            ->count();
 
         $lowStockCount = $products
             ->where('stock', '<=', 5)
@@ -57,7 +81,12 @@ class ProductController extends Controller
             'category'     => 'nullable|string|max:100',
             'brand'        => 'nullable|string|max:100',
             'expiry_date'  => 'nullable|date',
+            'image'        => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
 
         Product::create($data);
 
@@ -87,7 +116,15 @@ class ProductController extends Controller
             'category'     => 'nullable|string|max:100',
             'brand'        => 'nullable|string|max:100',
             'expiry_date'  => 'nullable|date',
+            'image'        => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
 
         $product->update($data);
 
@@ -101,8 +138,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
+        Product::findOrFail($id)->delete();
 
         return redirect()
             ->route('products.index')
@@ -126,8 +162,7 @@ class ProductController extends Controller
      */
     public function restore($id)
     {
-        $product = Product::onlyTrashed()->findOrFail($id);
-        $product->restore();
+        Product::onlyTrashed()->findOrFail($id)->restore();
 
         return redirect()
             ->route('products.trash')
@@ -140,6 +175,11 @@ class ProductController extends Controller
     public function forceDelete($id)
     {
         $product = Product::onlyTrashed()->findOrFail($id);
+
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
         $product->forceDelete();
 
         return redirect()

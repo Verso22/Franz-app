@@ -5,55 +5,96 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\Transaction;
+use App\Models\TransactionItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    /**
-     * 🛒 Add product to cart
-     */
+    public function index()
+    {
+        $cart = Auth::user()->activeCart()->with('items.product')->first();
+        return view('cart.index', compact('cart'));
+    }
+
     public function add(Product $product)
     {
         $user = Auth::user();
 
-        // 🚫 Safety: only customers can add to cart
-        if ($user->role !== 'customer') {
-            return back()->with('danger', 'Only customers can add to cart.');
-        }
-
-        // 🚫 Safety: out of stock
         if ($product->stock <= 0) {
-            return back()->with('danger', 'Product is out of stock.');
+            return back()->with('danger', 'Out of stock.');
         }
 
-        // 🧺 Get active cart or create one
-        $cart = $user->activeCart()->first();
+        $cart = $user->activeCart()->first()
+            ?? Cart::create(['user_id' => $user->id]);
 
-        if (! $cart) {
-            $cart = Cart::create([
-                'user_id' => $user->id,
-                'status'  => 'active',
-            ]);
-        }
+        $item = $cart->items()->where('product_id', $product->id)->first();
 
-        // 📦 Check if product already in cart
-        $item = $cart->items()
-            ->where('product_id', $product->id)
-            ->first();
-
-        if ($item) {
-            // ➕ Increase quantity
-            $item->increment('quantity');
-        } else {
-            // ➕ Add new product to cart
-            CartItem::create([
-                'cart_id'    => $cart->id,
+        $item
+            ? $item->increment('quantity')
+            : CartItem::create([
+                'cart_id' => $cart->id,
                 'product_id' => $product->id,
-                'quantity'   => 1,
+                'quantity' => 1,
             ]);
+
+        return back()->with('success', 'Added to cart.');
+    }
+
+    public function remove(CartItem $item)
+    {
+        $item->delete();
+        return back()->with('success', 'Item removed.');
+    }
+
+    /**
+     * ✅ CHECKOUT
+     */
+    public function checkout()
+    {
+        $user = Auth::user();
+        $cart = $user->activeCart()->with('items.product')->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return back()->with('danger', 'Cart is empty.');
         }
 
-        return back()->with('success', 'Product added to cart.');
+        DB::transaction(function () use ($cart, $user) {
+
+            $total = 0;
+
+            foreach ($cart->items as $item) {
+                $total += $item->quantity * $item->product->price;
+            }
+
+            // 🧾 Create transaction
+            $transaction = Transaction::create([
+                'user_id' => $user->id,
+                'total_amount' => $total,
+                'status' => 'completed',
+                'payment_method' => 'cash',
+            ]);
+
+            // 📦 Save items + reduce stock
+            foreach ($cart->items as $item) {
+
+                TransactionItem::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->product->price,
+                ]);
+
+                // 🔻 Reduce stock
+                $item->product->decrement('stock', $item->quantity);
+            }
+
+            // 🧹 Close cart
+            $cart->update(['status' => 'checked_out']);
+        });
+
+        return redirect()->route('store.index')
+            ->with('success', 'Checkout successful!');
     }
 }
