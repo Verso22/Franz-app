@@ -210,8 +210,8 @@ body {
         {{-- 👥 Employees (Admin only) --}}
         @if(auth()->check() && auth()->user()->isAdmin())
         <li>
-            <a href="{{ route('employees') }}"
-                class="nav-link {{ request()->routeIs('employees') ? 'active' : '' }}">
+            <a href="{{ route('employees.index') }}"
+                class="nav-link {{ request()->routeIs('employees.index') ? 'active' : '' }}">
                 <i class="bi bi-people"></i>
                 <span class="sidebar-text">Employees</span>
             </a>

@@ -8,6 +8,10 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\EmployeeController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -25,9 +29,8 @@ Route::get('/', function () {
 // ==============================================
 // 🧭 Dashboard
 // ==============================================
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
 
 // ==============================================
 // 🛍️ Customer Storefront (PUBLIC)
@@ -41,6 +44,10 @@ Route::get('/store/{product}', [StoreController::class, 'show'])
 // ==============================================
 // 🛒 Cart Routes (CUSTOMER — MUST LOGIN)
 // ==============================================
+Route::middleware([IsAdmin::class])->group(function () {
+    Route::get('/employees', [EmployeeController::class, 'index'])
+        ->name('employees.index');
+
 Route::middleware('auth')->group(function () {
 
     Route::get('/cart', [CartController::class, 'index'])
@@ -98,9 +105,24 @@ Route::middleware([IsAdmin::class])->group(function () {
 // 👥 Employees (Admin only)
 // ==============================================
 Route::middleware([IsAdmin::class])->group(function () {
-    Route::get('/employees', function () {
-        return view('employees');
-    })->name('employees');
+
+    Route::get('/employees', [EmployeeController::class, 'index'])
+        ->name('employees.index');
+
+    Route::get('/employees/create', [EmployeeController::class, 'create'])
+        ->name('employees.create');
+
+    Route::post('/employees', [EmployeeController::class, 'store'])
+        ->name('employees.store');
+
+    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
+        ->name('employees.destroy');
+
+    Route::get('/employees/trash', [EmployeeController::class, 'trash'])
+        ->name('employees.trash');
+
+    Route::patch('/employees/{id}/restore', [EmployeeController::class, 'restore'])
+        ->name('employees.restore');
 });
 
 // ==============================================
@@ -115,9 +137,11 @@ Route::get('/transactions/{transaction}', [TransactionController::class, 'show']
 // ==============================================
 // 📈 Reports
 // ==============================================
-Route::get('/reports', function () {
-    return view('reports');
-})->name('reports');
+Route::get('/reports', [ReportController::class, 'index'])
+    ->name('reports');
+
+Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])
+    ->name('reports.export.pdf');
 
 // ==============================================
 // 🔐 Authentication
@@ -145,3 +169,4 @@ Route::get('/profile', [ProfileController::class, 'index'])
 
 Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])
     ->name('profile.updatePassword');
+});
