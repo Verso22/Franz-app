@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ use App\Http\Middleware\IsAdmin;
 */
 
 // 🏠 Redirect home to dashboard
-Route::get('/', fn () => redirect()->route('dashboard'));
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ==============================================
 // 🔐 Authentication (PUBLIC)
