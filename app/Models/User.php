@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,8 +19,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // admin | employee | customer
-        'avatar'
+        'role',      // admin | employee | customer
+        'phone',
+        'address',
+        'avatar',
     ];
 
     /**
@@ -37,42 +38,38 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'phone'   => 'string',
+        'address' => 'string',
     ];
 
     /**
-     * 👶 Simple role check: is admin?
+     * 🔑 Role helpers
      */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    /**
-     * 👷 Is employee?
-     */
     public function isEmployee(): bool
     {
         return $this->role === 'employee';
     }
 
     /**
-     * 🧺 User has MANY carts
+     * 🧺 Carts
      */
     public function carts()
     {
         return $this->hasMany(Cart::class);
     }
 
-    /**
-     * 🧺 Get ACTIVE cart only
-     */
     public function activeCart()
     {
         return $this->hasOne(Cart::class)->where('status', 'active');
     }
 
     /**
-     * 💰 User has MANY transactions
+     * 💰 Transactions
      */
     public function transactions()
     {

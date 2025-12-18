@@ -13,12 +13,21 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if the user is authenticated and an admin
-        if (auth()->check() && auth()->user()->isAdmin()) {
-            return $next($request);
+        // Not logged in → redirect to login
+        if (!auth()->check()) {
+            return redirect()->route('login');
         }
 
-        // Redirect non-admins to dashboard with a danger toast
-        return redirect()->route('dashboard')->with('danger', 'Access denied — Admins only.');
+        // Logged in but not admin → block admin pages ONLY
+        if (!auth()->user()->isAdmin()) {
+            // IMPORTANT:
+            // Do NOT abort globally, it breaks logout & UX
+            return redirect()
+                ->route('dashboard')
+                ->with('danger', 'Access denied — Admins only.');
+        }
+
+        // Admin → allow
+        return $next($request);
     }
 }
