@@ -15,8 +15,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
+/* ================= Base ================= */
 body {
-    background-color: #ffffff;
+    background-color: #f9fafb;
     font-family: 'Poppins', sans-serif;
     margin: 0;
 }
@@ -24,25 +25,42 @@ body {
 /* ================= Navbar ================= */
 .navbar {
     background-color: #ffffff;
-    border-bottom: 1px solid #e5e5e5;
-    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem 1.5rem;
 }
 
 .navbar-brand {
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
 }
 
 .nav-link {
     font-weight: 500;
+    color: #374151;
+}
+
+.nav-link:hover {
+    color: #0d6efd;
+}
+
+/* Cart icon */
+.cart-link {
+    position: relative;
+    font-size: 1.25rem;
+}
+
+/* ================= Main Content ================= */
+main {
+    min-height: 70vh;
 }
 
 /* ================= Footer ================= */
 footer {
-    border-top: 1px solid #e5e5e5;
-    padding: 1rem 0;
+    border-top: 1px solid #e5e7eb;
+    padding: 1.5rem 0;
     margin-top: 4rem;
-    color: #777;
+    color: #6b7280;
+    background: #ffffff;
 }
 
 /* ================= Toast ================= */
@@ -52,10 +70,11 @@ footer {
     left: 50%;
     transform: translateX(-50%);
     padding: 12px 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     color: #fff;
     display: none;
     z-index: 2000;
+    font-weight: 500;
 }
 
 .toast-message.show {
@@ -70,21 +89,22 @@ footer {
 <body>
 
 {{-- ================= NAVBAR ================= --}}
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg sticky-top">
     <div class="container-fluid">
 
-        {{-- Brand / Home --}}
+        {{-- Brand --}}
         <a class="navbar-brand" href="{{ route('home') }}">
             <i class="bi bi-shop"></i> MyStore
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
                 data-bs-target="#publicNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="publicNavbar">
-            <ul class="navbar-nav ms-auto align-items-center gap-2">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
 
                 {{-- Store --}}
                 <li class="nav-item">
@@ -101,21 +121,30 @@ footer {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary btn-sm" href="{{ route('register') }}">
+                        <a class="btn btn-primary btn-sm px-3" href="{{ route('register') }}">
                             Register
                         </a>
                     </li>
                 @else
+                    {{-- Cart --}}
+                    <li class="nav-item">
+                        <a class="nav-link cart-link" href="{{ route('cart.index') }}">
+                            <i class="bi bi-cart"></i>
+                        </a>
+                    </li>
+
+                    {{-- Profile --}}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('profile') }}">
                             <i class="bi bi-person"></i> Profile
                         </a>
                     </li>
 
+                    {{-- Logout --}}
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button class="btn btn-outline-danger btn-sm">
+                            <button class="btn btn-outline-danger btn-sm px-3">
                                 Logout
                             </button>
                         </form>

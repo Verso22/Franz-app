@@ -9,21 +9,23 @@ use Illuminate\Support\Facades\Storage;
 class ProfileController extends Controller
 {
     /**
-     * 🧠 Show the profile page (ALL ROLES)
+     * Show profile page (ROLE AWARE)
      */
     public function index()
     {
-        return view('profile', [
-            'user' => auth()->user(),
-        ]);
+        $user = auth()->user();
+
+        // CUSTOMER → public profile
+        if ($user->role === 'customer') {
+            return view('profile.customer', compact('user'));
+        }
+
+        // ADMIN / EMPLOYEE → internal dashboard profile
+        return view('profile.internal', compact('user'));
     }
 
     /**
-     * 👤 Update profile information
-     * - name
-     * - phone
-     * - address
-     * - avatar
+     * Update profile info (ALL ROLES)
      */
     public function updateProfile(Request $request)
     {
@@ -36,10 +38,8 @@ class ProfileController extends Controller
             'avatar'  => 'nullable|image|max:2048',
         ]);
 
-        // Handle avatar upload ONLY if present
         if ($request->hasFile('avatar')) {
 
-            // Delete old avatar if exists
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
@@ -47,7 +47,6 @@ class ProfileController extends Controller
             $validated['avatar'] = $request->file('avatar')
                 ->store('avatars', 'public');
         } else {
-            // Prevent overwriting avatar with null
             unset($validated['avatar']);
         }
 
@@ -57,7 +56,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * 🔐 Update password (ALL ROLES)
+     * Update password (ALL ROLES)
      */
     public function updatePassword(Request $request)
     {
